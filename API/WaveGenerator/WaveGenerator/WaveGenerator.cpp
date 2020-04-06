@@ -7,11 +7,13 @@
 #pragma comment(lib,"winmm.lib")//高精度タイマ
 
 #include "resource.h"		//リソースファイル
-#include "Header.h"		//リソースファイル
+#include "header.h"		//リソースファイル
 
 //構造体
 typedef struct {
 	HWND	hwnd;
+	HWND	hPict1;
+	HWND	hPict2;
 	HWND	hEdit;
 }SEND_POINTER_STRUCT;
 
@@ -36,7 +38,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 //メインプロシージャ（ダイアログ）
 BOOL CALLBACK MainDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	
+	static HWND hPict1;
+	static HWND hPict2;
 	static HFONT hFont;				//フォント
+	//static HWND hWnd;
 	static HANDLE hThread;
 	static UINT thID;
 	static SEND_POINTER_STRUCT Sps;
@@ -45,8 +51,11 @@ BOOL CALLBACK MainDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg) {
 	case WM_INITDIALOG:		//ダイアログ初期化
 		Sps.hwnd = hDlg;
-		hEdit = GetDlgItem(hDlg, IDC_EDIT1);
-		Sps.hEdit = hEdit;
+		hPict1 = GetDlgItem(hDlg, IDC_STATIC_TOP);
+		hPict2 = GetDlgItem(hDlg, IDC_STATIC_BOTTOM);
+		Sps.hPict1 = hPict1;
+		Sps.hPict2 = hPict2;
+		//Sps.hEdit = hEdit;
 		return TRUE;
 
 	case WM_COMMAND:		//ボタンが押された時

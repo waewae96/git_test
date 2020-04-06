@@ -1,2 +1,24 @@
 ﻿  WaveGenerator.cpp
-  WaveGenerator.vcxproj -> C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\Debug\WaveGenerator.exe
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(48,28): error C2065: 'IDC_EDIT1': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(54,8): error C2065: 'ID_START': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(54,8): error C2131: 式は定数に評価されませんでした
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(54,8): message : 非定数の式 (またはサブ式) が検出されました
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(57,34): error C2065: 'ID_START': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(61,8): error C2065: 'ID_STOP': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(61,8): error C2131: 式は定数に評価されませんでした
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(61,8): message : 非定数の式 (またはサブ式) が検出されました
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(73,26): error C2065: 'ID_STOP': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(77,26): error C2065: 'ID_STOP': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(54,1): error C2051: case 式は、整数型定数でなければなりません。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(61,1): error C2051: case 式は、整数型定数でなければなりません。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(80,3): warning C4060: switch ステートメントに 'case' または 'default' ラベルがありません。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(144,38): error C2065: 'ID_START': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(153,28): error C2065: 'IDC_EDIT1': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(167,28): error C2065: 'IDC_STATIC3': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(176,29): error C2065: 'IDC_STATIC3': 定義されていない識別子です。
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(125,12): error C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(142,7): error C4996: 'fscanf': This function or variable may be unsafe. Consider using fscanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(150,3): error C4996: '_gcvt': This function or variable may be unsafe. Consider using _gcvt_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(165,3): error C4996: '_itoa': This function or variable may be unsafe. Consider using _itoa_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(174,4): error C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
+C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(177,4): error C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
