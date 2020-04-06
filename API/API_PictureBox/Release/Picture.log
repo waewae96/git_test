@@ -1,0 +1,3 @@
+﻿  main.cpp
+resource.rc(10): fatal error RC1015: cannot open include file 'afxres.h'.
+  
