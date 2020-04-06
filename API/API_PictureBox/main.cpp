@@ -106,7 +106,7 @@ BOOL CALLBACK MainDlgProc( HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam )
 			//‚±‚±‚©‚ç
 					
 
-			hPict = GetDlgItem(hDlg, ID_OK);
+			hPict = GetDlgItem(hDlg, IDC_PICTBOX);
 
 
             //‚±‚±‚Ü‚Å	
@@ -247,9 +247,7 @@ HRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		//‚±‚±‚©‚ç
 
 		
-		Rectangle(hdc, 0, 0, wParam, lParam);
-		Ellipse(hdc, 0, 0, wParam, lParam);
-
+		Ellipse(hdc, 0, 0, 500, 500);
 
 
         //‚±‚±‚Ü‚Å

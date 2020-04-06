@@ -1,3 +1,2 @@
 ﻿  main.cpp
-resource.rc(10): fatal error RC1015: cannot open include file 'afxres.h'.
-  
+  Picture.vcxproj -> C:\Users\Kazue\Documents\GitHub\git_test\API\API_PictureBox\.\Release\Picture.exe
