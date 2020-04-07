@@ -1,4 +1,1 @@
-﻿  WaveGenerator.cpp
-C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(213,18): warning C4101: 'hPenWave': ローカル変数は 1 度も使われていません。
-C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(213,41): warning C4101: 'hOldPenWave': ローカル変数は 1 度も使われていません。
-  WaveGenerator.vcxproj -> C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\Debug\WaveGenerator.exe
+﻿  WaveGenerator.vcxproj -> C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\Debug\WaveGenerator.exe

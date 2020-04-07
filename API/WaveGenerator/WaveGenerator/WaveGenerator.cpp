@@ -72,6 +72,7 @@ BOOL CALLBACK MainDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//データ読み込みスレッド起動
 			hThread = (HANDLE)_beginthreadex(NULL, 0, TFunc, (PVOID)&Sps, 0, &thID);   //_beginthreadex→スレッドを立ち上げる関数	
 			EnableWindow(GetDlgItem(hDlg, ID_START), FALSE);						//開始ボタン無効化　　　　//EnableWindowで入力を無効または有効にする。
+			EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);						//ストップボタン有効化　
 
 			return TRUE;
 
@@ -157,10 +158,12 @@ UINT WINAPI TFunc(LPVOID thParam)
 		}
 		//データの読み込み
 		if (fscanf(fp, "%lf", &data) == EOF) {
-			//背景の再描画//
-			///////////////////////////////////////////////////////////////////////////////
+			//背景の再描画
+
+			//読み込みを最初からにして再びループに入る
+
 			MessageBox(NULL, TEXT("終了"), TEXT("INFORMATION"), MB_OK | MB_ICONEXCLAMATION);
-			//EnableWindow(GetDlgItem(FU->hwnd, ID_START), TRUE);		//開始ボタン有効
+			EnableWindow(GetDlgItem(FU->hwnd, ID_START), TRUE);		//開始ボタン有効
 			Flag = FALSE;												//ループ終了フラグ
 			return FALSE;
 		}
