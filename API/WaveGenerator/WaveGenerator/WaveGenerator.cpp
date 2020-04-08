@@ -111,22 +111,36 @@ UINT WINAPI TFunc(LPVOID thParam)
 {
 	static SEND_POINTER_STRUCT* FU = (SEND_POINTER_STRUCT*)thParam;        //構造体のポインタ取得
 
+
 	FILE* fp;			//ファイルポインタ
 	BOOL Flag = TRUE;		//ループフラグ
 	HFONT hFont;		//フォント
+	PAINTSTRUCT ps1, ps2;					//(構造体)クライアント領域描画するための情報	
+	HDC hdc1, hdc2;
 
 	double data;		//データ
-	char str[256];		//データ
-	char str2[256];     //分数用
-	wchar_t wcs1[256];
-	wchar_t wcs2[256];
-	size_t ret;
+	HPEN hPenWave, hOldPenWave;
+	colorWave = RGB(0, 0, 255);
+	RECT rect;	//描画領域
+	GetClientRect(FU->hPict1, &rect);
+	int xMax, xMin;
+	double yZero;
+	int ifEven = 1, counter = 0;
+	int x1, oldX1, x2, oldX2;
+	double y1, oldY1, y2, oldY2;
+
 
 	/*　wchar_t型　***********************************************
 	char型はLPCWS型と互換性がないためそのままだと文字化けする。
 	mbstowcs_s関数を用いて、charからwcharに変換する必要がある。
 	***************************************************************/
-
+	hdc1 = BeginPaint(FU->hPict1, &ps1);//デバイスコンテキストのハンドル取得
+	hdc2 = BeginPaint(FU->hPict2, &ps2);//デバイスコンテキストのハンドル取得
+	hPenWave = CreatePen(PS_SOLID, 2, colorWave);		//ペン生成
+	hOldPenWave = (HPEN)SelectObject(hdc1, hPenWave);		//ペン設定
+	hOldPenWave = (HPEN)SelectObject(hdc2, hPenWave);
+	xMax= rect.right - 30,	xMin = 30,	yZero = rect.bottom / 2;
+	oldX1 = xMin - 1, oldX2 = xMin - 1, x1 = xMin, x2 = xMin;
 
 	DWORD DNum = 0, beforeTime;
 
@@ -156,24 +170,57 @@ UINT WINAPI TFunc(LPVOID thParam)
 		if (idealTime > progress) {
 			Sleep(idealTime - progress);			//理想時間になるまで待機
 		}
+		
 		//データの読み込み
 		if (fscanf(fp, "%lf", &data) == EOF) {
-			//背景の再描画
-
-			//読み込みを最初からにして再びループに入る
-
 			MessageBox(NULL, TEXT("終了"), TEXT("INFORMATION"), MB_OK | MB_ICONEXCLAMATION);
 			EnableWindow(GetDlgItem(FU->hwnd, ID_START), TRUE);		//開始ボタン有効
+			EnableWindow(GetDlgItem(FU->hwnd, IDCANCEL), FALSE);	//ストップボタン無効
 			Flag = FALSE;												//ループ終了フラグ
 			return FALSE;
 		}
+		counter++;
 
 		//表示
-		_gcvt(data, 8, str);								//double型を文字列に変換
-		//_gcvt(idealTime, 8, str);								//double型を文字列に変換
-		mbstowcs_s(&ret, wcs1, 256, str, _TRUNCATE);        //charからwcharに変換する
-		//SetDlgItemText(FU->hwnd, IDC_EDIT1, wcs1);				//エディタに表示
+		switch (counter % 2) {
+		case 1:
+			if (oldX1 == xMin - 1) {
+				x1++;	 oldX1++;
+				y1 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
+				break;
+			}
+			oldY1 = y1;
+				y1 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
+			//軸描画
+			MoveToEx(hdc1, oldX1, (int)oldY1, NULL);
+			LineTo(hdc1, x1, (int)y1);
+			x1++;	oldX1++;
+			if (x1 > xMax) {
+				oldX1 = xMin - 1, x1 = xMin;
+			}
+			break;
 
+		case 0:
+			if (oldX2 == xMin - 1) {
+				x2++;	 oldX2++;
+				y2 = -1.0 * data * (rect.bottom/2-30.0) + yZero;
+				break; 
+			}
+			oldY2 = y2;
+			y2 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
+			//軸描画
+			MoveToEx(hdc2, oldX2, (int)oldY2, NULL);
+			LineTo(hdc2, x2, (int)y2);
+			x2++;	oldX2++;
+			if (x2 > xMax) {
+				oldX2 = xMin - 1, x2 = xMin;
+				InvalidateRect(FU->hwnd, NULL, TRUE);
+				counter = 0;
+			}
+			break;
+		}
+
+		
 		DNum++;
 
 		//一秒経過時
@@ -181,27 +228,16 @@ UINT WINAPI TFunc(LPVOID thParam)
 			beforeTime = nowTime;
 			DNum = 0;
 		}
-
-		//秒数表示
-		time++;
-		_itoa((int)(time / (int)DEF_DATAPERS), str, 10);	//秒数(int型)を文字列に変換
-		mbstowcs_s(&ret, wcs1, 256, str, _TRUNCATE);        //charからwcharに変換する
-		//SetDlgItemText(FU->hwnd, IDC_STATIC3, wcs1);			//表示
-
-
-																//60秒経過したとき
-		if (time == 60000) {
-			min++;                                          //分表示に切り替える
-			time = 0;
-			itoa((int)(time / (int)DEF_DATAPERS), str, 10);	//秒数(int型)を文字列に変換
-			mbstowcs_s(&ret, wcs1, 256, str, _TRUNCATE);    //charからwcharに変換する
-			//SetDlgItemText(FU->hwnd, IDC_STATIC3, wcs1);			//0と表示
-			itoa((int)(min), str2, 10);	                 //分数(int型)を文字列に変換
-			mbstowcs_s(&ret, wcs2, 256, str2, _TRUNCATE);    //charからwcharに変換する
-			//SetDlgItemText(FU->hwnd, IDC_STATIC1, wcs2);       //分数を画面表示
-
-		}
 	}
+
+	//ペン，ブラシ廃棄
+	SelectObject(hdc1, hOldPenWave);
+	SelectObject(hdc2, hOldPenWave);
+	DeleteObject(hPenWave);
+	
+	//デバイスコンテキストのハンドル破棄
+	EndPaint(FU->hPict1, &ps1);
+	EndPaint(FU->hPict2, &ps2);
 
 	return 0;
 }
@@ -213,7 +249,7 @@ HRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	HDC			hdc;				//デバイスコンテキストのハンドル
 	PAINTSTRUCT ps;					//(構造体)クライアント領域描画するための情報	
 	HBRUSH		hBrushBack, hOldBrushBack;	//ブラシ
-	HPEN		hPenAxis, hPenWave, hOldPenAxis, hOldPenWave;		//ペン
+	HPEN		hPenAxis, hOldPenAxis;		//ペン
 	RECT		rect;	//描画領域
 
 	switch (uMsg) {
@@ -221,23 +257,9 @@ HRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		//色指定
 		colorBackground = RGB(0, 0, 0);
 		colorAxis = RGB(255, 255, 255);
-		colorWave = RGB(0, 0, 255);
 		break;
 
 	case WM_PAINT:
-
-		/********************************
-
-		PictureControlに描画するためには，HDC型のハンドルを別に取得する
-		必要があります．
-
-		例：hdc = BeginPaint(hWnd, &ps);
-		hdc:デバイスコンテキストのハンドル
-		hWnd:PictureControlのハンドル
-		ps：(構造体)クライアント領域描画するための情報
-
-		********************************/
-
 		hdc = BeginPaint(hWnd, &ps);//デバイスコンテキストのハンドル取得
 
 		//ペン，ブラシ生成
@@ -254,49 +276,16 @@ HRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		MoveToEx(hdc, 30, rect.bottom/2, NULL);
 		LineTo(hdc, rect.right - 30, rect.bottom/2);
 
-		//hPenWave = CreatePen(PS_SOLID, 2, colorWave);		//ペン生成
-		//hOldPenWave = (HPEN)SelectObject(hdc, hPenWave);		//ペン設定
-
-
-		//描画
-		/********************************
-
-		図形を描画するためには以下の関数を用います．
-		長方形：Rectangle(HDC hdc ,int nLeftRect , int nTopRect ,int nRightRect , int nBottomRect);
-		円：Ellipse(HDC hdc ,int nLeftRect , int nTopRect ,int nRightRect , int nBottomRect);
-
-		 nLiftRect：長方形の左上X座標
-		  nTopRect：左上Y座標
-		  nRightRect：右下X座標
-		  nBottomRect：右下のY座標
-
-		線を引くには以下の関数を用います．
-
-		線の始点設定：MoveToEx(HDC hdc , int X , int Y , NULL);
-		  X,Y：線の始点の座標
-		線；LineTo(HDC hdc , int nXEnd , int nYEnd);
-		  nXEnd, nYEnd：線の終点の設定
-
-
-		  以上を参考に図形を描画する関数を以下に記述しましょう
-		********************************/
 		SetTextAlign(hdc, TA_CENTER);
 		SetTextColor(hdc, colorAxis);
 		SetBkColor(hdc, colorBackground);
 		TextOut(hdc, rect.right/2, rect.bottom - 30, TEXT("Time(s)"), 7);		//テキスト描画
 
 		//ペン，ブラシ廃棄
-		/********************************
-
-		使い終わったペンとブラシは破棄する必要があります．
-
-		********************************/
 		SelectObject(hdc, hOldBrushBack);
 		DeleteObject(hBrushBack);
 		SelectObject(hdc, hOldPenAxis);
 		DeleteObject(hPenAxis);
-		//SelectObject(hdc, hOldPenWave);
-		//DeleteObject(hPenWave);
 
 		//デバイスコンテキストのハンドル破棄
 		EndPaint(hWnd, &ps);
