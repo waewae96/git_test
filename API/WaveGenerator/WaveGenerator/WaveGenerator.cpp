@@ -221,6 +221,8 @@ UINT WINAPI TFunc(LPVOID thParam)
 		
 		//表示
 		switch (counter % 5) {
+		case 1:
+			break;
 		case 2:
 			if (data - offset[0] > max[0])	data = 1;
 			else if (data - offset[0] < -1 * max[0])	data = -1;
