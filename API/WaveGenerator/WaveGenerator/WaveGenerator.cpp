@@ -15,7 +15,8 @@ typedef struct {
 	HWND	hwnd;
 	HWND	hPict1;
 	HWND	hPict2;
-	//HWND	hEdit;
+	HWND	hPict3;
+	HWND	hPict4;
 }SEND_POINTER_STRUCT;
 
 //メイン関数(ダイアログバージョン)
@@ -42,9 +43,9 @@ BOOL CALLBACK MainDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	
 	static HWND hPict1;
 	static HWND hPict2;
+	static HWND hPict3;
+	static HWND hPict4;
 	static HFONT hFont;				//フォント
-	static HWND hWnd1;
-	static HWND hWnd2;
 	static HANDLE hThread;
 	static UINT thID;
 	static SEND_POINTER_STRUCT Sps;
@@ -53,11 +54,14 @@ BOOL CALLBACK MainDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg) {
 	case WM_INITDIALOG:		//ダイアログ初期化
 		Sps.hwnd = hDlg;
-		hPict1 = GetDlgItem(hDlg, IDC_STATIC_TOP);
-		hPict2 = GetDlgItem(hDlg, IDC_STATIC_BOTTOM);
+		hPict1 = GetDlgItem(hDlg, IDC_STATIC_LT);
+		hPict2 = GetDlgItem(hDlg, IDC_STATIC_LB);
+		hPict3 = GetDlgItem(hDlg, IDC_STATIC_RT);
+		hPict4 = GetDlgItem(hDlg, IDC_STATIC_RB);
 		Sps.hPict1 = hPict1;
 		Sps.hPict2 = hPict2;
-		//Sps.hEdit = hEdit;
+		Sps.hPict3 = hPict3;
+		Sps.hPict4 = hPict4;
 		EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);						//ストップボタン無効化　
 		return TRUE;
 
@@ -65,10 +69,11 @@ BOOL CALLBACK MainDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam)) {
 		case ID_START:			//開始ボタン
 
-			/*とりあえず1つめWindowだけおわらす*/
 			//初期化(背景等描画)
-			WinInitialize(NULL, hDlg, (HMENU)110, "CLS1", Sps.hPict1, WndProc, &hWnd1); 
-			WinInitialize(NULL, hDlg, (HMENU)110, "CLS2", Sps.hPict2, WndProc, &hWnd2);
+			WinInitialize(NULL, hDlg, (HMENU)110, "CLS1", Sps.hPict1, WndProc, &hPict1); 
+			WinInitialize(NULL, hDlg, (HMENU)110, "CLS2", Sps.hPict2, WndProc, &hPict2);
+			WinInitialize(NULL, hDlg, (HMENU)110, "CLS3", Sps.hPict3, WndProc, &hPict3);
+			WinInitialize(NULL, hDlg, (HMENU)110, "CLS4", Sps.hPict4, WndProc, &hPict4);
 			//データ読み込みスレッド起動
 			hThread = (HANDLE)_beginthreadex(NULL, 0, TFunc, (PVOID)&Sps, 0, &thID);   //_beginthreadex→スレッドを立ち上げる関数	
 			EnableWindow(GetDlgItem(hDlg, ID_START), FALSE);						//開始ボタン無効化　　　　//EnableWindowで入力を無効または有効にする。
@@ -112,11 +117,14 @@ UINT WINAPI TFunc(LPVOID thParam)
 	static SEND_POINTER_STRUCT* FU = (SEND_POINTER_STRUCT*)thParam;        //構造体のポインタ取得
 
 
-	FILE* fp;			//ファイルポインタ
+	FILE* fp;
+	FILE* fpPara;			//ファイルポインタ
+	char getstr[15];
+	double offset[4], max[4];
 	BOOL Flag = TRUE;		//ループフラグ
 	HFONT hFont;		//フォント
-	PAINTSTRUCT ps1, ps2;					//(構造体)クライアント領域描画するための情報	
-	HDC hdc1, hdc2;
+	PAINTSTRUCT ps1, ps2, ps3, ps4;					//(構造体)クライアント領域描画するための情報	
+	HDC hdc1, hdc2, hdc3, hdc4;
 
 	double data;		//データ
 	HPEN hPenWave, hOldPenWave;
@@ -125,9 +133,9 @@ UINT WINAPI TFunc(LPVOID thParam)
 	GetClientRect(FU->hPict1, &rect);
 	int xMax, xMin;
 	double yZero;
-	int ifEven = 1, counter = 0;
-	int x1, oldX1, x2, oldX2;
-	double y1, oldY1, y2, oldY2;
+	int ifInitial = 1, counter = 0;
+	int x, oldX;
+	double y1, oldY1, y2, oldY2, y3, oldY3, y4, oldY4;
 
 
 	/*　wchar_t型　***********************************************
@@ -136,11 +144,23 @@ UINT WINAPI TFunc(LPVOID thParam)
 	***************************************************************/
 	hdc1 = BeginPaint(FU->hPict1, &ps1);//デバイスコンテキストのハンドル取得
 	hdc2 = BeginPaint(FU->hPict2, &ps2);//デバイスコンテキストのハンドル取得
+	hdc3 = BeginPaint(FU->hPict3, &ps3);//デバイスコンテキストのハンドル取得
+	hdc4 = BeginPaint(FU->hPict4, &ps4);//デバイスコンテキストのハンドル取得
 	hPenWave = CreatePen(PS_SOLID, 2, colorWave);		//ペン生成
 	hOldPenWave = (HPEN)SelectObject(hdc1, hPenWave);		//ペン設定
-	hOldPenWave = (HPEN)SelectObject(hdc2, hPenWave);
+	SelectObject(hdc2, hPenWave);
+	SelectObject(hdc3, hPenWave);
+	SelectObject(hdc4, hPenWave);
 	xMax= rect.right - 30,	xMin = 30,	yZero = rect.bottom / 2;
-	oldX1 = xMin - 1, oldX2 = xMin - 1, x1 = xMin, x2 = xMin;
+	oldX = xMin - 1, x = xMin;
+	SetTextColor(hdc1, RGB(255, 255, 255));
+	SetBkColor(hdc1, RGB(0, 0, 0));
+	SetTextColor(hdc2, RGB(255, 255, 255));
+	SetBkColor(hdc2, RGB(0, 0, 0));
+	SetTextColor(hdc3, RGB(255, 255, 255));
+	SetBkColor(hdc3, RGB(0, 0, 0));
+	SetTextColor(hdc4, RGB(255, 255, 255));
+	SetBkColor(hdc4, RGB(0, 0, 0));
 
 	DWORD DNum = 0, beforeTime;
 
@@ -154,7 +174,22 @@ UINT WINAPI TFunc(LPVOID thParam)
 	beforeTime = timeGetTime();						//現在の時刻計算（初期時間）
 
 													//ファイルオープン
-	if ((fp = fopen("data.txt", "r")) == NULL) {
+	if ((fpPara = fopen("13_49_57para.txt", "r")) == NULL) {
+		MessageBox(NULL, TEXT("Input File Open ERROR!"), NULL, MB_OK | MB_ICONERROR);
+		return FALSE;
+	}
+
+	for (int i = 0; i < 4; i++) {
+		fscanf(fpPara, "%s%lf", getstr, &offset[i]);
+	}
+	for (int i = 0; i < 4; i++) {
+		fscanf(fpPara, "%s%lf", getstr, &max[i]);
+	}
+
+
+
+
+	if ((fp = fopen("13_49_57check.txt", "r")) == NULL) {
 		MessageBox(NULL, TEXT("Input File Open ERROR!"), NULL, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
@@ -171,6 +206,7 @@ UINT WINAPI TFunc(LPVOID thParam)
 			Sleep(idealTime - progress);			//理想時間になるまで待機
 		}
 		
+		
 		//データの読み込み
 		if (fscanf(fp, "%lf", &data) == EOF) {
 			MessageBox(NULL, TEXT("終了"), TEXT("INFORMATION"), MB_OK | MB_ICONEXCLAMATION);
@@ -179,41 +215,83 @@ UINT WINAPI TFunc(LPVOID thParam)
 			Flag = FALSE;												//ループ終了フラグ
 			return FALSE;
 		}
+
 		counter++;
 
+		
 		//表示
-		switch (counter % 2) {
-		case 1:
-			if (oldX1 == xMin - 1) {
-				x1++;	 oldX1++;
+		switch (counter % 5) {
+		case 2:
+			if (data - offset[0] > max[0])	data = 1;
+			else if (data - offset[0] < -1 * max[0])	data = -1;
+			else data = (data - offset[0]) / max[0];
+			if (ifInitial == 1) {
+				Sleep(30);
+				TextOut(hdc1, 10, 10, TEXT("Ch1"), 3);		//テキスト描画
 				y1 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
 				break;
 			}
 			oldY1 = y1;
-				y1 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
+			y1 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero	;
 			//軸描画
-			MoveToEx(hdc1, oldX1, (int)oldY1, NULL);
-			LineTo(hdc1, x1, (int)y1);
-			x1++;	oldX1++;
-			if (x1 > xMax) {
-				oldX1 = xMin - 1, x1 = xMin;
-			}
+			MoveToEx(hdc1, oldX, (int)oldY1, NULL);
+			LineTo(hdc1, x, (int)y1);
 			break;
 
-		case 0:
-			if (oldX2 == xMin - 1) {
-				x2++;	 oldX2++;
-				y2 = -1.0 * data * (rect.bottom/2-30.0) + yZero;
-				break; 
+		case 3:
+			if (data - offset[1] > max[1])	data = 1;
+			else if (data - offset[1] < -1 * max[1])	data = -1;
+			else data = (data - offset[1]) / max[1];
+			if (ifInitial == 1) {
+				Sleep(30);
+				TextOut(hdc2, 10, 10, TEXT("Ch2"), 3);		//テキスト描画
+				y2 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
+				break;
 			}
 			oldY2 = y2;
 			y2 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
 			//軸描画
-			MoveToEx(hdc2, oldX2, (int)oldY2, NULL);
-			LineTo(hdc2, x2, (int)y2);
-			x2++;	oldX2++;
-			if (x2 > xMax) {
-				oldX2 = xMin - 1, x2 = xMin;
+			MoveToEx(hdc2, oldX, (int)oldY2, NULL);
+			LineTo(hdc2, x, (int)y2);
+			break;
+		case 4:
+			if (data - offset[2] > max[2])	data = 1;
+			else if (data - offset[2] < -1 * max[2])	data = -1;
+			else data = (data - offset[2]) / max[2];
+			if (ifInitial == 1) {
+				Sleep(30);
+				TextOut(hdc3, 10, 10, TEXT("Ch3"), 3);		//テキスト描画
+				y3 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
+				break;
+			}
+			oldY3 = y3;
+			y3 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
+			//軸描画
+			MoveToEx(hdc3, oldX, (int)oldY3, NULL);
+			LineTo(hdc3, x, (int)y3);
+			break;
+
+		case 0:
+			if (data - offset[3] > max[3])	data = 1;
+			else if (data - offset[3] < -1 * max[3])	data = -1;
+			else data = (data - offset[3]) / max[3];
+			if (ifInitial == 1) {
+				Sleep(30);
+				TextOut(hdc4, 10, 10, TEXT("Ch4"), 3);		//テキスト描画
+				ifInitial = 0;
+				x++;	 oldX++;
+				y4 = -1.0 * data * (rect.bottom/2-30.0) + yZero;
+				break; 
+			}
+			oldY4 = y4;
+			y4 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
+			//軸描画
+			MoveToEx(hdc4, oldX, (int)oldY4, NULL);
+			LineTo(hdc4, x, (int)y4);
+			x++;	oldX++;
+			if (x > xMax) {
+				oldX = xMin - 1, x = xMin;
+				ifInitial = 1;
 				InvalidateRect(FU->hwnd, NULL, TRUE);
 				counter = 0;
 			}
@@ -232,12 +310,13 @@ UINT WINAPI TFunc(LPVOID thParam)
 
 	//ペン，ブラシ廃棄
 	SelectObject(hdc1, hOldPenWave);
-	SelectObject(hdc2, hOldPenWave);
 	DeleteObject(hPenWave);
 	
 	//デバイスコンテキストのハンドル破棄
 	EndPaint(FU->hPict1, &ps1);
 	EndPaint(FU->hPict2, &ps2);
+	EndPaint(FU->hPict3, &ps3);
+	EndPaint(FU->hPict4, &ps4);
 
 	return 0;
 }

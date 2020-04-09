@@ -3,9 +3,10 @@
 // WaveGenerator.rc ‚ÅŽg—p
 //
 #define IDD_DIALOG1                     101
-#define IDC_STATICTOP                   1001
-#define IDC_STATIC_TOP                  1002
-#define IDC_STATIC_BOTTOM               1003
+#define IDC_STATIC_LT                   1002
+#define IDC_STATIC_LB                   1003
+#define IDC_STATIC_RT                   1004
+#define IDC_STATIC_RB                   1005
 #define ID_START                        1006
 
 // Next default values for new objects
