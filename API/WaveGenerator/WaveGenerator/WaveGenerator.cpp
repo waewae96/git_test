@@ -74,6 +74,7 @@ BOOL CALLBACK MainDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			WinInitialize(NULL, hDlg, (HMENU)110, "CLS2", Sps.hPict2, WndProc, &hPict2);
 			WinInitialize(NULL, hDlg, (HMENU)110, "CLS3", Sps.hPict3, WndProc, &hPict3);
 			WinInitialize(NULL, hDlg, (HMENU)110, "CLS4", Sps.hPict4, WndProc, &hPict4);
+			
 			//データ読み込みスレッド起動
 			hThread = (HANDLE)_beginthreadex(NULL, 0, TFunc, (PVOID)&Sps, 0, &thID);   //_beginthreadex→スレッドを立ち上げる関数	
 			EnableWindow(GetDlgItem(hDlg, ID_START), FALSE);						//開始ボタン無効化　　　　//EnableWindowで入力を無効または有効にする。
@@ -142,10 +143,10 @@ UINT WINAPI TFunc(LPVOID thParam)
 	char型はLPCWS型と互換性がないためそのままだと文字化けする。
 	mbstowcs_s関数を用いて、charからwcharに変換する必要がある。
 	***************************************************************/
-	hdc1 = BeginPaint(FU->hPict1, &ps1);//デバイスコンテキストのハンドル取得
-	hdc2 = BeginPaint(FU->hPict2, &ps2);//デバイスコンテキストのハンドル取得
-	hdc3 = BeginPaint(FU->hPict3, &ps3);//デバイスコンテキストのハンドル取得
-	hdc4 = BeginPaint(FU->hPict4, &ps4);//デバイスコンテキストのハンドル取得
+	hdc1 = GetDC(FU->hPict1);//デバイスコンテキストのハンドル取得
+	hdc2 = GetDC(FU->hPict2);//デバイスコンテキストのハンドル取得
+	hdc3 = GetDC(FU->hPict3);//デバイスコンテキストのハンドル取得
+	hdc4 = GetDC(FU->hPict4);//デバイスコンテキストのハンドル取得
 	hPenWave = CreatePen(PS_SOLID, 2, colorWave);		//ペン生成
 	hOldPenWave = (HPEN)SelectObject(hdc1, hPenWave);		//ペン設定
 	SelectObject(hdc2, hPenWave);
@@ -322,6 +323,17 @@ UINT WINAPI TFunc(LPVOID thParam)
 
 	return 0;
 }
+
+//
+//UINT WINAPI Wave(LPVOID thParam) {
+//	static SEND_POINTER_STRUCT* FU = (SEND_POINTER_STRUCT*)thParam;        //構造体のポインタ取得
+//
+//
+//	return 0;
+//}
+
+
+
 
 //子ウィンドウプロシージャ1
 HRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
