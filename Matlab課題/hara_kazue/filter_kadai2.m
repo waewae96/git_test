@@ -22,22 +22,29 @@ para = fscanf(fileID2, formatPara);
 %p = strsplit(para);
 fclose(fileID2);
 figure(1)
-for index = 2:5
+for index = 1:4
     ylim([-1 1])
-    subplot(2, 2, index-1)
-    plot(t, d(index, :));
+    subplot(2, 2, index)
+    plot(t, d(index+1, :));
+    title(['Ch', num2str(index), ' (筋電データ)'])
 end
 
 
 [b_band,a_band] = butter(2, [fc_band_low/(fs/2) fc_band_high/(fs/2)], 'bandpass');
 [b_low,a_low] = butter(2, fc_low/(fs/2), 'low');
 
-%ch1 = d(2, :);
-%ch12 = filter(b_band, a_band, ch1);
 %手順2　(index = 1は通し番号なので飛ばす)
 
 for index = 2:5
     d(index, :) = filter(b_band, a_band, d(index, :));
+end
+
+figure(2)
+for index = 1:4
+    ylim([-1 1])
+    subplot(2, 2, index)
+    plot(t, d(index+1, :));
+    title(['Ch', num2str(index), ' (バンドパス)'])
 end
 
 %3
@@ -45,9 +52,25 @@ for index = 2:5
     d(index, :) = abs(d(index, :));
 end
 
+figure(3)
+for index = 1:4
+    ylim([-1 1])
+    subplot(2, 2, index)
+    plot(t, d(index+1, :));
+    title(['Ch', num2str(index), ' (全波整流)'])
+end
+
 %4
 for index = 2:5;
     d(index, :) = filter(b_low, a_low, d(index,:));
+end
+
+figure(4)
+for index = 1:4
+    ylim([-1 1])
+    subplot(2, 2, index)
+    plot(t, d(index+1, :));
+    title(['Ch', num2str(index), ' (ローパス)'])
 end
 
 %5
@@ -55,9 +78,7 @@ end
 
 for i = 2:5
   for j = 1:size
-      if d(i, j) - para(i-1) > para(i+3)
-          d(i, j) = 1;
-      elseif d(i, j) - para(i-1) < 0
+      if d(i, j) - para(i-1) < 0
           d(i, j) = 0;
       else
           d(i, j) = d(i, j) - para(i-1);
@@ -65,9 +86,25 @@ for i = 2:5
   end
 end
 
+figure(5)
+for index = 1:4
+    ylim([-1 1])
+    subplot(2, 2, index)
+    plot(t, d(index+1, :));
+    title(['Ch', num2str(index), ' (オフセット除去)'])
+end
+
 %6
 for index = 2:5
     d(index, :) = d(index, :) / para(i+3);
+end
+
+figure(6)
+for index = 1:4
+    ylim([-1 1])
+    subplot(2, 2, index)
+    plot(t, d(index+1, :));
+    title(['Ch', num2str(index), ' (正規化)'])
 end
 
 %7
@@ -81,19 +118,10 @@ for i = 1:size
     end
 end
 
-figure(2)
-for index = 2:5
-    subplot(2, 2, index-1)
-    plot(t, d(index, :));
+figure(7)
+for index = 1:4
+    ylim([-1 1])
+    subplot(2, 2, index)
+    plot(t, d(index+1, :));
+    title(['Ch', num2str(index), ' (総和1)'])
 end
-
-%{
-fileWrite = fopen('output.txt', 'w');
-for i = 1:size
-    fprintf(fileWrite, '%d ', d(1, i));
-    for j = 2:4
-        fprintf(fileWrite, '%f ', d(j, i));
-    end
-    fprintf(fileWrite, '%f\n', d(5, i));
-end
-%}
