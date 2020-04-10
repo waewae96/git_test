@@ -29,7 +29,7 @@ for index = 2:5
 end
 
 
-[b_band,a_band] = butter(2, [fc_band_high/(fs/2) fc_band_low/(fs/2)], 'bandpass');
+[b_band,a_band] = butter(2, [fc_band_low/(fs/2) fc_band_high/(fs/2)], 'bandpass');
 [b_low,a_low] = butter(2, fc_low/(fs/2), 'low');
 
 %ch1 = d(2, :);
@@ -40,14 +40,6 @@ for index = 2:5
     d(index, :) = filter(b_band, a_band, d(index, :));
 end
 
-figure(2)
-for index = 2:5
-    ylim([-1 1])
-    subplot(2, 2, index-1)
-    plot(t, d(index, :));
-end
-
-%{
 %3
 for index = 2:5
     d(index, :) = abs(d(index, :));
@@ -88,7 +80,14 @@ for i = 1:size
         d(:, i) = d(:,i) / sum;
     end
 end
-%}
+
+figure(2)
+for index = 2:5
+    subplot(2, 2, index-1)
+    plot(t, d(index, :));
+end
+
+%{
 fileWrite = fopen('output.txt', 'w');
 for i = 1:size
     fprintf(fileWrite, '%d ', d(1, i));
@@ -97,3 +96,4 @@ for i = 1:size
     end
     fprintf(fileWrite, '%f\n', d(5, i));
 end
+%}

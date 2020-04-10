@@ -3,6 +3,7 @@
 #include <stdio.h>			//入出力用
 #include <process.h>		//スレッド用
 #include <stdlib.h>
+#include <cmath>
 
 #pragma warning(disable: 4996)
 #pragma comment(lib,"winmm.lib")//高精度タイマ
@@ -120,8 +121,7 @@ UINT WINAPI TFunc(LPVOID thParam)
 
 	FILE* fp;
 	FILE* fpPara;			//ファイルポインタ
-	char getstr[15];
-	double offset[4], max[4];
+	double max[4] = { 0 }, min[4] = { 0 };
 	BOOL Flag = TRUE;		//ループフラグ
 	HFONT hFont;		//フォント
 	PAINTSTRUCT ps1, ps2, ps3, ps4;					//(構造体)クライアント領域描画するための情報	
@@ -134,7 +134,7 @@ UINT WINAPI TFunc(LPVOID thParam)
 	GetClientRect(FU->hPict1, &rect);
 	int xMax, xMin;
 	double yZero;
-	int ifInitial = 1, counter = 0;
+	int ifInitial = 1, counter = -1;
 	int x, oldX;
 	double y1, oldY1, y2, oldY2, y3, oldY3, y4, oldY4;
 
@@ -165,7 +165,7 @@ UINT WINAPI TFunc(LPVOID thParam)
 
 	DWORD DNum = 0, beforeTime;
 
-	int time = 0, min = 0;
+	int time = 0;
 
 	//エディタのフォント変更(case WM_INITDIALOG:の中で設定しても良い)
 	hFont = CreateFont(15, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
@@ -175,19 +175,31 @@ UINT WINAPI TFunc(LPVOID thParam)
 	beforeTime = timeGetTime();						//現在の時刻計算（初期時間）
 
 													//ファイルオープン
-	if ((fpPara = fopen("13_49_57para.txt", "r")) == NULL) {
+	if ((fpPara = fopen("13_49_57check.txt", "r")) == NULL) {
 		MessageBox(NULL, TEXT("Input File Open ERROR!"), NULL, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 
-	for (int i = 0; i < 4; i++) {
-		fscanf(fpPara, "%s%lf", getstr, &offset[i]);
+	int i;
+	while (Flag == TRUE) {
+		if (fscanf(fpPara, "%lf", &data) == EOF) {
+			Flag = FALSE;												//ループ終了フラグ
+		}
+		counter++;
+		i = counter % 5;
+		if (i == 0)
+			continue;
+		
+		max[i - 1] = max[i - 1] < data ? data : max[i - 1];
+		min[i - 1] = data < min[i - 1] ? data : min[i - 1];
 	}
-	for (int i = 0; i < 4; i++) {
-		fscanf(fpPara, "%s%lf", getstr, &max[i]);
+	
+	for (i = 0; i < 4; i++) {
+		min[i] = abs(min[i]);
+		max[i] = max[i] > min[i] ? max[i] : min[i];
 	}
 
-
+	fclose(fpPara);
 
 
 	if ((fp = fopen("13_49_57check.txt", "r")) == NULL) {
@@ -195,6 +207,8 @@ UINT WINAPI TFunc(LPVOID thParam)
 		return FALSE;
 	}
 
+	counter = 0;
+	Flag = TRUE;
 	//データ読み込み・表示
 	while (Flag == TRUE) {
 		DWORD nowTime, progress, idealTime;
@@ -225,11 +239,8 @@ UINT WINAPI TFunc(LPVOID thParam)
 		case 1:
 			break;
 		case 2:
-			if (data - offset[0] > max[0])	data = 1;
-			else if (data - offset[0] < -1 * max[0])	data = -1;
-			else data = (data - offset[0]) / max[0];
+			data = data / max[0];
 			if (ifInitial == 1) {
-				Sleep(30);
 				TextOut(hdc1, 10, 10, TEXT("Ch1"), 3);		//テキスト描画
 				y1 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
 				break;
@@ -242,11 +253,8 @@ UINT WINAPI TFunc(LPVOID thParam)
 			break;
 
 		case 3:
-			if (data - offset[1] > max[1])	data = 1;
-			else if (data - offset[1] < -1 * max[1])	data = -1;
-			else data = (data - offset[1]) / max[1];
+			data = data / max[1];
 			if (ifInitial == 1) {
-				Sleep(30);
 				TextOut(hdc2, 10, 10, TEXT("Ch2"), 3);		//テキスト描画
 				y2 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
 				break;
@@ -258,11 +266,8 @@ UINT WINAPI TFunc(LPVOID thParam)
 			LineTo(hdc2, x, (int)y2);
 			break;
 		case 4:
-			if (data - offset[2] > max[2])	data = 1;
-			else if (data - offset[2] < -1 * max[2])	data = -1;
-			else data = (data - offset[2]) / max[2];
+			data = (data ) / max[2];
 			if (ifInitial == 1) {
-				Sleep(30);
 				TextOut(hdc3, 10, 10, TEXT("Ch3"), 3);		//テキスト描画
 				y3 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
 				break;
@@ -275,11 +280,8 @@ UINT WINAPI TFunc(LPVOID thParam)
 			break;
 
 		case 0:
-			if (data - offset[3] > max[3])	data = 1;
-			else if (data - offset[3] < -1 * max[3])	data = -1;
-			else data = (data - offset[3]) / max[3];
+			data = data / max[3];
 			if (ifInitial == 1) {
-				Sleep(30);
 				TextOut(hdc4, 10, 10, TEXT("Ch4"), 3);		//テキスト描画
 				ifInitial = 0;
 				x++;	 oldX++;
