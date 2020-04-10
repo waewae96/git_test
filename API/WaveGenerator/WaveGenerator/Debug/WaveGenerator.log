@@ -1,6 +1,2 @@
 ﻿  WaveGenerator.cpp
-C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(127,29): warning C4101: 'ps4': ローカル変数は 1 度も使われていません。
-C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(127,14): warning C4101: 'ps1': ローカル変数は 1 度も使われていません。
-C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(127,19): warning C4101: 'ps2': ローカル変数は 1 度も使われていません。
-C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\WaveGenerator\WaveGenerator.cpp(127,24): warning C4101: 'ps3': ローカル変数は 1 度も使われていません。
   WaveGenerator.vcxproj -> C:\Users\Kazue\Documents\GitHub\git_test\API\WaveGenerator\Debug\WaveGenerator.exe

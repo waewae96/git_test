@@ -9,5 +9,6 @@ BOOL CALLBACK MainDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	/
 BOOL WinInitialize(HINSTANCE hInst, HWND hPaWnd, HMENU chID, const char* cWinName, HWND PaintArea, WNDPROC WndProc, HWND* hDC);//子ウィンドウを生成
 UINT WINAPI TFunc(LPVOID thParam);												//データ読み込み用スレッド
 HRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);		//子ウィンドウプロシージャ
+bool paintBack(HWND hWnd, LPCTSTR ch);
 
 static COLORREF	colorBackground, colorAxis, colorWave;	//色

@@ -4,6 +4,7 @@
 #include <process.h>		//スレッド用
 #include <stdlib.h>
 #include <cmath>
+#include <string>
 
 #pragma warning(disable: 4996)
 #pragma comment(lib,"winmm.lib")//高精度タイマ
@@ -124,7 +125,6 @@ UINT WINAPI TFunc(LPVOID thParam)
 	double max[4] = { 0 }, min[4] = { 0 };
 	BOOL Flag = TRUE;		//ループフラグ
 	HFONT hFont;		//フォント
-	PAINTSTRUCT ps1, ps2, ps3, ps4;					//(構造体)クライアント領域描画するための情報	
 	HDC hdc1, hdc2, hdc3, hdc4;
 
 	double d, data[4];		//データ
@@ -154,15 +154,7 @@ UINT WINAPI TFunc(LPVOID thParam)
 	SelectObject(hdc4, hPenWave);
 	xMax= rect.right - 30,	xMin = 30,	yZero = rect.bottom / 2;
 	oldX = xMin - 1, x = xMin;
-	SetTextColor(hdc1, RGB(255, 255, 255));
-	SetBkColor(hdc1, RGB(0, 0, 0));
-	SetTextColor(hdc2, RGB(255, 255, 255));
-	SetBkColor(hdc2, RGB(0, 0, 0));
-	SetTextColor(hdc3, RGB(255, 255, 255));
-	SetBkColor(hdc3, RGB(0, 0, 0));
-	SetTextColor(hdc4, RGB(255, 255, 255));
-	SetBkColor(hdc4, RGB(0, 0, 0));
-
+	
 	DWORD DNum = 0, beforeTime;
 
 	int time = 0;
@@ -209,6 +201,20 @@ UINT WINAPI TFunc(LPVOID thParam)
 
 	counter = 0;
 	Flag = TRUE;
+
+	SetTextColor(hdc1, RGB(255, 255, 255));
+	SetBkColor(hdc1, RGB(0, 0, 0));
+	TextOut(hdc1, 10, 10, TEXT("Ch1"), 3);		//テキスト描画
+	SetTextColor(hdc2, RGB(255, 255, 255));
+	SetBkColor(hdc2, RGB(0, 0, 0));
+	TextOut(hdc2, 10, 10, TEXT("Ch2"), 3);		//テキスト描画
+	SetTextColor(hdc3, RGB(255, 255, 255));
+	SetBkColor(hdc3, RGB(0, 0, 0));
+	TextOut(hdc3, 10, 10, TEXT("Ch3"), 3);		//テキスト描画
+	SetTextColor(hdc4, RGB(255, 255, 255));
+	SetBkColor(hdc4, RGB(0, 0, 0));
+	TextOut(hdc4, 10, 10, TEXT("Ch4"), 3);		//テキスト描画
+
 	//データ読み込み・表示
 	while (Flag == TRUE) {
 		DWORD nowTime, progress, idealTime;
@@ -237,11 +243,6 @@ UINT WINAPI TFunc(LPVOID thParam)
 		}
 
 		if (ifInitial == 1) {
-			Sleep(10);
-			TextOut(hdc1, 10, 10, TEXT("Ch1"), 3);		//テキスト描画
-			TextOut(hdc2, 10, 10, TEXT("Ch2"), 3);		//テキスト描画
-			TextOut(hdc3, 10, 10, TEXT("Ch3"), 3);		//テキスト描画
-			TextOut(hdc4, 10, 10, TEXT("Ch4"), 3);		//テキスト
 			ifInitial = 0;
 			x++;	oldX++;
 			for (i = 0; i < 4; i++)
@@ -265,10 +266,12 @@ UINT WINAPI TFunc(LPVOID thParam)
 		if (x > xMax) {
 			oldX = xMin - 1, x = xMin;
 			ifInitial = 1;
-			InvalidateRect(FU->hwnd, NULL, TRUE);
+			paintBack(FU->hPict1, TEXT("Ch1"));
+			paintBack(FU->hPict2, TEXT("Ch2"));
+			paintBack(FU->hPict3, TEXT("Ch3"));
+			paintBack(FU->hPict4, TEXT("Ch4"));
 		}
 
-		
 		DNum++;
 
 		//一秒経過時
@@ -291,14 +294,46 @@ UINT WINAPI TFunc(LPVOID thParam)
 	return 0;
 }
 
-//
-//UINT WINAPI Wave(LPVOID thParam) {
-//	static SEND_POINTER_STRUCT* FU = (SEND_POINTER_STRUCT*)thParam;        //構造体のポインタ取得
-//
-//
-//	return 0;
-//}
+bool paintBack(HWND hWnd, LPCTSTR ch) {
+	HDC			hdc;				//デバイスコンテキストのハンドル
+	HBRUSH		hBrushBack, hOldBrushBack;	//ブラシ
+	HPEN		hPenAxis, hOldPenAxis;		//ペン
+	RECT		rect;	//描画領域
 
+	hdc = GetDC(hWnd);//デバイスコンテキストのハンドル取得
+
+		//ペン，ブラシ生成
+	hBrushBack = CreateSolidBrush(colorBackground);				//ブラシ生成
+	hOldBrushBack = (HBRUSH)SelectObject(hdc, hBrushBack);	//ブラシ
+	GetClientRect(hWnd, &rect);	//領域の大きさ取得
+	Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);	//背景描画
+
+	hPenAxis = CreatePen(PS_SOLID, 2, colorAxis);		//ペン生成
+	hOldPenAxis = (HPEN)SelectObject(hdc, hPenAxis);		//ペン設定
+	//軸描画
+	MoveToEx(hdc, 30, 15, NULL);
+	LineTo(hdc, 30, rect.bottom - 15);
+	MoveToEx(hdc, 30, rect.bottom / 2, NULL);
+	LineTo(hdc, rect.right - 30, rect.bottom / 2);
+
+	SetTextColor(hdc, RGB(255, 255, 255));
+	SetBkColor(hdc, RGB(0, 0, 0));
+	TextOut(hdc, 10, 10, ch, 3);		//テキスト描画
+	SetTextAlign(hdc, TA_CENTER);
+	SetTextColor(hdc, colorAxis);
+	SetBkColor(hdc, colorBackground);
+	TextOut(hdc, rect.right / 2, rect.bottom - 30, TEXT("Time(s)"), 7);		//テキスト描画
+
+	//ペン，ブラシ廃棄
+	SelectObject(hdc, hOldBrushBack);
+	DeleteObject(hBrushBack);
+	SelectObject(hdc, hOldPenAxis);
+	DeleteObject(hPenAxis);
+
+	//デバイスコンテキストのハンドル破棄
+	ReleaseDC(hWnd, hdc);
+	return true;
+}
 
 
 
