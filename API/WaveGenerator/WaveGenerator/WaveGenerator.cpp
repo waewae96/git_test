@@ -127,7 +127,7 @@ UINT WINAPI TFunc(LPVOID thParam)
 	PAINTSTRUCT ps1, ps2, ps3, ps4;					//(構造体)クライアント領域描画するための情報	
 	HDC hdc1, hdc2, hdc3, hdc4;
 
-	double data;		//データ
+	double d, data[4];		//データ
 	HPEN hPenWave, hOldPenWave;
 	colorWave = RGB(0, 0, 255);
 	RECT rect;	//描画領域
@@ -136,7 +136,7 @@ UINT WINAPI TFunc(LPVOID thParam)
 	double yZero;
 	int ifInitial = 1, counter = -1;
 	int x, oldX;
-	double y1, oldY1, y2, oldY2, y3, oldY3, y4, oldY4;
+	double y[4], oldy[4];
 
 
 	/*　wchar_t型　***********************************************
@@ -182,16 +182,16 @@ UINT WINAPI TFunc(LPVOID thParam)
 
 	int i;
 	while (Flag == TRUE) {
-		if (fscanf(fpPara, "%lf", &data) == EOF) {
-			Flag = FALSE;												//ループ終了フラグ
+		if (fscanf(fpPara, "%lf", &d) == EOF) {
+			Flag = FALSE;												
 		}
 		counter++;
 		i = counter % 5;
 		if (i == 0)
 			continue;
 		
-		max[i - 1] = max[i - 1] < data ? data : max[i - 1];
-		min[i - 1] = data < min[i - 1] ? data : min[i - 1];
+		max[i - 1] = max[i - 1] < d ? d : max[i - 1];
+		min[i - 1] = d < min[i - 1] ? d : min[i - 1];
 	}
 	
 	for (i = 0; i < 4; i++) {
@@ -223,7 +223,7 @@ UINT WINAPI TFunc(LPVOID thParam)
 		
 		
 		//データの読み込み
-		if (fscanf(fp, "%lf", &data) == EOF) {
+		if (fscanf(fp, "%lf", &d) == EOF) {
 			MessageBox(NULL, TEXT("終了"), TEXT("INFORMATION"), MB_OK | MB_ICONEXCLAMATION);
 			EnableWindow(GetDlgItem(FU->hwnd, ID_START), TRUE);		//開始ボタン有効
 			EnableWindow(GetDlgItem(FU->hwnd, IDCANCEL), FALSE);	//ストップボタン無効
@@ -231,76 +231,41 @@ UINT WINAPI TFunc(LPVOID thParam)
 			return FALSE;
 		}
 
-		counter++;
+		for (i = 0; i < 4 ; i++) {
+			fscanf(fp, "%lf", &data[i]);
+			data[i] /= max[i];
+		}
 
-		
-		//表示
-		switch (counter % 5) {
-		case 1:
-			break;
-		case 2:
-			data = data / max[0];
-			if (ifInitial == 1) {
-				TextOut(hdc1, 10, 10, TEXT("Ch1"), 3);		//テキスト描画
-				y1 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
-				break;
-			}
-			oldY1 = y1;
-			y1 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero	;
-			//軸描画
-			MoveToEx(hdc1, oldX, (int)oldY1, NULL);
-			LineTo(hdc1, x, (int)y1);
-			break;
-
-		case 3:
-			data = data / max[1];
-			if (ifInitial == 1) {
-				TextOut(hdc2, 10, 10, TEXT("Ch2"), 3);		//テキスト描画
-				y2 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
-				break;
-			}
-			oldY2 = y2;
-			y2 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
-			//軸描画
-			MoveToEx(hdc2, oldX, (int)oldY2, NULL);
-			LineTo(hdc2, x, (int)y2);
-			break;
-		case 4:
-			data = (data ) / max[2];
-			if (ifInitial == 1) {
-				TextOut(hdc3, 10, 10, TEXT("Ch3"), 3);		//テキスト描画
-				y3 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
-				break;
-			}
-			oldY3 = y3;
-			y3 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
-			//軸描画
-			MoveToEx(hdc3, oldX, (int)oldY3, NULL);
-			LineTo(hdc3, x, (int)y3);
-			break;
-
-		case 0:
-			data = data / max[3];
-			if (ifInitial == 1) {
-				TextOut(hdc4, 10, 10, TEXT("Ch4"), 3);		//テキスト描画
-				ifInitial = 0;
-				x++;	 oldX++;
-				y4 = -1.0 * data * (rect.bottom/2-30.0) + yZero;
-				break; 
-			}
-			oldY4 = y4;
-			y4 = -1.0 * data * (rect.bottom / 2 - 30.0) + yZero;
-			//軸描画
-			MoveToEx(hdc4, oldX, (int)oldY4, NULL);
-			LineTo(hdc4, x, (int)y4);
+		if (ifInitial == 1) {
+			Sleep(10);
+			TextOut(hdc1, 10, 10, TEXT("Ch1"), 3);		//テキスト描画
+			TextOut(hdc2, 10, 10, TEXT("Ch2"), 3);		//テキスト描画
+			TextOut(hdc3, 10, 10, TEXT("Ch3"), 3);		//テキスト描画
+			TextOut(hdc4, 10, 10, TEXT("Ch4"), 3);		//テキスト
+			ifInitial = 0;
 			x++;	oldX++;
-			if (x > xMax) {
-				oldX = xMin - 1, x = xMin;
-				ifInitial = 1;
-				InvalidateRect(FU->hwnd, NULL, TRUE);
-				counter = 0;
-			}
-			break;
+			for (i = 0; i < 4; i++)
+				y[i] = -1.0 * data[i] * (rect.bottom / 2 - 30.0) + yZero;
+			continue;
+		}
+		for (i = 0; i < 4; i++) {
+			oldy[i] = y[i];
+			y[i] = -1.0 * data[i] * (rect.bottom / 2 - 30.0) + yZero;
+		}
+		//軸描画
+		MoveToEx(hdc1, oldX, (int)oldy[0], NULL);
+		LineTo(hdc1, x, (int)y[0]);
+		MoveToEx(hdc2, oldX, (int)oldy[1], NULL);
+		LineTo(hdc2, x, (int)y[1]);
+		MoveToEx(hdc3, oldX, (int)oldy[2], NULL);
+		LineTo(hdc3, x, (int)y[2]);
+		MoveToEx(hdc4, oldX, (int)oldy[3], NULL);
+		LineTo(hdc4, x, (int)y[3]);
+		x++;	oldX++;
+		if (x > xMax) {
+			oldX = xMin - 1, x = xMin;
+			ifInitial = 1;
+			InvalidateRect(FU->hwnd, NULL, TRUE);
 		}
 
 		
@@ -318,10 +283,10 @@ UINT WINAPI TFunc(LPVOID thParam)
 	DeleteObject(hPenWave);
 	
 	//デバイスコンテキストのハンドル破棄
-	EndPaint(FU->hPict1, &ps1);
-	EndPaint(FU->hPict2, &ps2);
-	EndPaint(FU->hPict3, &ps3);
-	EndPaint(FU->hPict4, &ps4);
+	ReleaseDC(FU->hPict1, hdc1);
+	ReleaseDC(FU->hPict2, hdc2);
+	ReleaseDC(FU->hPict3, hdc3);
+	ReleaseDC(FU->hPict4, hdc4);
 
 	return 0;
 }
